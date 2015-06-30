@@ -1,0 +1,120 @@
+<?$this->renderScript('common/admin-head.phtml')?>
+<!-- Page Content -->
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <h1>Add Vehicle</h1>
+        <div class="row">
+            <div class="col-lg-12">
+                <form class="form-inline" role="form" method="post" action="edit-vehicle">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="lpn" placeholder="车牌号">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="model" placeholder="品牌型号(eg. Audi A6L)">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="color" placeholder="颜色">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="seats" placeholder="座位数">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Vehicle</button>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Vehicles</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>LPN</th>
+                                <th>Model</th>
+                                <th>Color</th>
+                                <th>Seats</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?foreach ($this->vehicles as $v) {?>
+                            <tr id="vehicle-<?=$v['id']?>">
+                                <td name="lpn"><?=htmlspecialchars($v['lpn'])?></td>
+                                <td name="model"><?=htmlspecialchars($v['model'])?></td>
+                                <td name="color"><?=htmlspecialchars($v['color'])?></td>
+                                <td name="seats"><?=htmlspecialchars($v['seats'])?></td>
+                                <td><a href="javascript:editVehicle('<?=$v['id']?>');">Edit</a> <a href="javascript:deleteVehicle('<?=$v['id']?>');">Delete</a></td>
+                            </tr>
+                            <?}?>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <!-- /.row -->
+        <!-- Edit order modal -->
+        <div class="modal fade" id="edit-vehicle" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form role="form" method="post" action="edit-vehicle" id="edit-form">
+                        <input type="hidden" id="id" name="id" value="" />
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="editModalLabel">Edit Vehicle</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="lpn">License Plate Number</label>
+                                <input id="lpn" name="lpn" placeholder="License Plate Number" class="form-control" required="" type="text" value="">
+                            </div>
+                            <div class="form-group">
+                                <label for="model">Brand and Model</label>
+                                <input id="model" name="model" placeholder="Brand &amp; Model" class="form-control" required="" type="text" value="">
+                            </div>
+                            <div class="form-group">
+                                <label for="color">Color</label>
+                                <input id="color" name="color" placeholder="Color" class="form-control" required="" type="text" value="">
+                            </div>
+                            <div class="form-group">
+                                <label for="color">Seats</label>
+                                <input id="seats" name="seats" placeholder="Seats" class="form-control" required="" type="text" value="">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="submit-button">Save Change</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+    </div>
+    <!-- /.container-fluid -->
+</div>
+<!-- /#page-wrapper -->
+<script>
+function editVehicle(id) {
+    $('#id').val(id);
+    var fields = ['lpn', 'model', 'color', 'seats'];
+    for (var i=0; i<fields.length; i++) {
+        var orig = $('#vehicle-' + id + '>td[name=' + fields[i] + ']').html();
+        $('#' + fields[i]).val(orig);
+    }
+    $('#edit-vehicle').modal();
+}
+function deleteVehicle(id) {
+    if (confirm('Do you want to delete this vehicle?')) {
+        window.location.href="delete-vehicle?id=" + id;
+    }
+}
+</script>
+<?$this->renderScript('common/user-foot.phtml')?>

@@ -1,0 +1,19 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<title>Internal Server Error (500)</title>
+</head>
+<body>
+	<h1>Internal Server Error(500)</h1>
+	<p>Error occured while processing request, please retry later.</p>
+<?php if (IN_CLI || SHOW_ERROR) {?>
+<div style="font-family:menlo;courier-new;font-size:12px;">
+<h3><?=$this->e->getMessage()?> (<?=$this->e->getFile()?> line <?=$this->e->getLine()?>)</h3>
+<pre style="font-family:menlo;courier-new;font-size:12px;">
+	<?print_r($this->e->getTrace())?>
+</pre>
+</div>
+<?}?>
+</body>
+</html>

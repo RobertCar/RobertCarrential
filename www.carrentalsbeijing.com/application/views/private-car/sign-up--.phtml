@@ -1,0 +1,148 @@
+<?$this->renderScript('common/head.phtml')?>
+<div class="main">
+     <div class="container">
+          <section class="hgroup">
+               <h1>注册/登录</h1>
+               <ul class="breadcrumb pull-right">
+                    <li><a href="index.html">首页</a> </li>
+                    <li class="active">注册/登录</li>
+               </ul>
+          </section>
+          <section>
+               <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                         <div class="signin">
+                              <h3>已有账户</h3>
+                              <p class="sign_title">使用用户名登录</p>
+                              <div class="row">
+                                   <div class="col-lg-2"></div>
+                                   <div class="form col-lg-8">
+                                        <form id="signin-form">
+                                             <input id="signin-username" placeholder="用户名" class="form-control" type="text">
+                                             <input id="signin-password" placeholder="密码" class="form-control" type="password">
+                                             <div class="forgot">
+                                                  <div class="checkbox">
+                                                       <label class="">
+                                                            <input type="checkbox">
+                                                            自动登录</label>
+                                                  </div>
+                                                  <a href="register.html#">找回密码</a> </div>
+                                             <button id="signin-button" type="button" class="btn btn-primary btn-lg">登录</button>
+                                        </form>
+                                   </div>
+                                   <div class="col-lg-2"></div>
+                              </div>
+                         </div>
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                         <div class="signup">
+                              <form id="signup-form">
+                                   <fieldset>
+                                        <h3>还没有账户？</h3>
+                                        <p class="sign_title">注册新用户</p>
+                                        <div class="row">
+                                             <div class="col-lg-2"></div>
+                                             <div class="col-lg-8">
+                                                  <input id="signup-username" name="username" placeholder="用户名" class="form-control" required="" type="text">
+                                                  <input id="signup-email" name="email" placeholder="邮件地址" class="form-control" required="" type="text">
+                                                  <input id="signup-password" name="password" placeholder="密码" class="form-control" required="" type="password">
+                                                  <input id="signup-password2" name="password2" placeholder="重复密码" class="form-control" required="" type="password">
+                                                  <!--
+                                                  <div class="checkbox">
+                                                       <label class="">
+                                                            <input name="checkboxes" value="Option one" type="checkbox">
+                                                            I agree to the <a href="register.html#">terms and conditions</a> </label>
+                                                  </div>
+                                                  -->
+                                             </div>
+                                             <div class="col-lg-2"></div>
+                                        </div>
+                                        <button id="signup-button" type="button" class="btn btn-success btn-lg">注册</button>
+                                   </fieldset>
+                              </form>
+                         </div>
+                    </div>
+               </div>
+          </section>
+     </div>
+     <?$this->renderScript('common/foot.phtml')?>
+</div><!-- div class=main -->
+<script>
+function signup() {
+     username = $('#signup-username').val();
+     email = $('#signup-email').val();
+     password = $('#signup-password').val();
+     password2 = $('#signup-password2').val();
+     if (username.length<1) {
+          alert('用户名不能为空');
+          return;
+     }
+     if (email.length<1) {
+          alert('密码不能为空');
+          return;
+     }
+     if (password.length<1) {
+          alert('密码不能为空');
+          return;
+     }
+     if (password != password2) {
+          alert('两次密码不一致');
+          return;
+     }
+     p = {};
+     p['username'] = username;
+     p['email'] = email;
+     p['password'] = password;
+     $.post('/user/signup?t='+Math.random(), p, function(data) {
+          signupDidComplete(data);
+     }, 'json')
+     .error(function(e) { alert('注册失败请稍后再试' + e); });
+}
+function signupDidComplete(data) {
+     s = '';
+     if (data['status'] == 0) {
+          for (var id in data['errors']) {
+               if (data['errors'].hasOwnProperty(id)) {
+                    s += data['errors'][id] + "\n";
+               }
+          }
+          alert("发生以下错误：\n" +s);
+          return;
+     }
+     document.location.href="/user";
+}
+
+function signin() {
+     username = $('#signin-username').val();
+     password = $('#signin-password').val();
+     if (username.length<1) {
+          alert('用户名不能为空');
+          return;
+     }
+     if (password.length<1) {
+          alert('密码不能为空');
+          return;
+     }
+     p = {};
+     p['username'] = username;
+     p['password'] = password;
+     $.post('/user/signin?t='+Math.random(), p, function(data) {
+          signinDidComplete(data);
+     }, 'json')
+     .error(function(e) { alert('登录失败请稍后再试' + e); });
+}
+function signinDidComplete(data) {
+     s = '';
+     if (data['status'] == 0) {
+          s = data['message'];
+          alert("发生以下错误：\n" +s);
+          return;
+     }
+     document.location.href="/user";
+}
+
+$('#signin-button').on('click', signin);
+$('#signup-button').on('click', signup);
+</script>
+</body>
+</html>

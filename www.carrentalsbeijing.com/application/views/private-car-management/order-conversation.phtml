@@ -1,0 +1,157 @@
+<?$this->renderScript('common/admin-head.phtml')?>
+<script src="http://cdn.staticfile.org/moment.js/2.8.3/moment.min.js"></script>
+<style>
+#conversations-container {
+    height: 400px;
+    width: 100%;
+    overflow-y: scroll;
+    margin-bottom: 16px;
+    border:1px solid #ccc;
+}
+.conversation-box {
+    width:90%;
+    display: block;
+    margin: 10px 10px 10px 10px;
+    font-size: 14px;
+}
+
+.sender-cs {
+    float:right;
+    text-align: right;
+}
+.sender-cs .conversation-title {
+    font-size: 12px;
+    color: #666;
+}
+
+.sender-passenger, .sender-driver {
+    float: left;
+    text-align: left;
+}
+.sender-passenger .conversation-title {
+    font-size: 12px;
+    color: #FF6600;
+}
+
+.sender-driver .conversation-title {
+    font-size: 12px;
+    color: #0099CC;
+}
+</style>
+
+<!-- Page Content -->
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <h1>Order Conversation For SN: <?=$this->sn?></h1>
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="conversations-container">
+                    <div id="row-template" style="display:none" class="conversation-box">
+                        <div class="conversation-title"></div>
+                        <div class="conversation-message"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <form id="conversation-form" role="form" method="post" action="add-order-conversation">
+                <input type="hidden" name="sn" value="<?=$this->sn?>" />
+                <div class="col-lg-10">
+                    <div class="form-group">
+                        <input id="message-input-box" type="text" class="form-control" name="message" placeholder="Message">
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="form-group">
+                        <input id="submit-button" type="submit" value="Send" class="form-control btn btn-primary" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</div>
+<!-- /#page-wrapper -->
+<script>
+var sn = '<?=$this->sn?>';
+var lastId = 0;
+var apiUrl = 'order-conversation';
+var imagePrefix = 'http://order-conversation-images.carrentalsbeijing.com/';
+var conversationsContainer = '';
+var conversationBoxTemplate = '';
+var senderTitles = {
+    'driver' : '司机',
+    'passenger' : '乘客',
+    'cs' : '客服(我)'
+}
+
+function startWorking() {
+    conversationsContainer = $('#conversations-container');
+    conversationBoxTemplate = $('#row-template');
+    startFetchingConversations();
+}
+
+function startFetchingConversations() {
+    var params = {
+        'getConversation' : 'y',
+        'sn' : sn,
+        'lastId': lastId
+    };
+    $.ajax({
+        complete: fetchConversationsDidComplete,
+        data: params,
+        success: fetchConversationsDidSuccess,
+        url: apiUrl
+    });
+}
+
+function fetchConversationsDidSuccess(data, status, jqxhr) {
+    if (data['status'] != 1) {
+        return;
+    }
+    var rows = data['message'];
+    for (var i=0; i<rows.length; i++) {
+        var row = rows[i];
+        lastId = row['id'];
+        drawConversation(row);
+    }
+}
+
+function fetchConversationsDidComplete() {
+    setTimeout(startFetchingConversations, 1000);
+}
+
+function drawConversation(row) {
+    var id = row['id'];
+    var sender = row['sender'];
+    var message = row['message'];
+    var time = row['created_time'];
+    var image = row['image_url'];
+    var date = moment.unix(time);
+    var timeString = date.format('YYYY-MM-DD HH:mm:ss');
+    var tpl = conversationBoxTemplate.clone();
+    tpl.attr('id', 'id-' + id);
+    tpl.addClass('sender-' + sender);
+    conversationsContainer.append(tpl);
+    var title = senderTitles[sender] + ' ' + timeString;
+    if (image.length>1) {
+        imageurl = imagePrefix + image + '!thumb';
+        message = '<image onload="conversationsContainer.scrollTop(conversationsContainer.prop(\'scrollHeight\'));" src="' + imageurl + '" />';
+    }
+    $('#id-' + id + '>.conversation-title').html(title);
+    $('#id-' + id + '>.conversation-message').html(message);
+    tpl.show();
+    conversationsContainer.scrollTop(conversationsContainer.prop('scrollHeight'));
+}
+
+var options = {
+    clearForm : true
+};
+
+$('#conversation-form').ajaxForm(options);
+
+
+startWorking();
+</script>
+<?$this->renderScript('common/user-foot.phtml')?>

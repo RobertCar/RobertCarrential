@@ -1,0 +1,114 @@
+id: 2-11.0.r62/0
+type: file
+pred: 2-11.0.r61/45
+count: 12
+text: 58 0 254 4416 652a87734cae925fbfffb80e37f2033b 14934275090f2f6b6eba51df58db56158caa0f5c 61-1p/_3
+props: 1 247724 34 0 25e6c2f7558b7484000d4d090dea5b92
+cpath: /application/libs/ApiControllerAbstract.php
+copyroot: 0 /
+
+PLAIN
+K 27
+AdminControllerAbstract.php
+V 20
+file a-1.0.r1/249132
+K 16
+AjaxResponse.php
+V 20
+file c-1.0.r1/249399
+K 25
+ApiControllerAbstract.php
+V 17
+file 2-11.0.r62/0
+K 7
+ApnsPHP
+V 20
+dir 9-52.0.r53/12116
+K 22
+ControllerAbstract.php
+V 19
+file d-1.0.r11/2714
+K 19
+class.phpmailer.php
+V 21
+file 4-31.0.r31/42486
+K 14
+class.smtp.php
+V 21
+file 6-31.0.r31/42750
+K 4
+core
+V 17
+dir e-1.0.r7/2012
+END
+ENDREP
+id: 9-1.0.r62/681
+type: dir
+pred: 9-1.0.r61/727
+count: 17
+text: 62 281 387 0 23a299a329a1712d934b9c69c5c683cc
+cpath: /application/libs
+copyroot: 0 /
+
+PLAIN
+K 10
+config.php
+V 20
+file 2-1.0.r31/41144
+K 11
+controllers
+V 18
+dir 4-1.0.r57/2470
+K 4
+data
+V 20
+dir 1-52.0.r53/10702
+K 4
+libs
+V 17
+dir 9-1.0.r62/681
+K 6
+models
+V 18
+dir o-1.0.r36/1230
+K 5
+views
+V 18
+dir s-1.0.r51/1374
+END
+ENDREP
+id: 0-1.0.r62/1067
+type: dir
+pred: 0-1.0.r61/1113
+count: 60
+text: 62 831 223 0 6095d30369c7eeb8735d225e4763272e
+cpath: /application
+copyroot: 0 /
+
+PLAIN
+K 11
+application
+V 18
+dir 0-1.0.r62/1067
+K 4
+docs
+V 18
+dir 19-1.0.r9/6404
+K 6
+public
+V 20
+dir 1a-1.0.r31/45383
+END
+ENDREP
+id: 0.0.r62/1342
+type: dir
+pred: 0.0.r61/1388
+count: 62
+text: 62 1214 115 0 f64e16518d2abe9a3f91052e1313e82f
+cpath: /
+copyroot: 0 /
+
+2-11.0.t61-1p modify-file true false /application/libs/ApiControllerAbstract.php
+
+
+1342 1475

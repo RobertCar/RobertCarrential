@@ -1,0 +1,150 @@
+<?$this->renderScript('common/user-head.phtml')?>
+<!-- Page Content -->
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Booking</h1>
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <form role="form" id="booking-form" method="post" action="/private-car/booking">
+                    <!--
+                    <label>Who</label>
+                    <div class="form-group">
+                        <label class="radio-inline"><input type="radio" id="who-myself" name="forwho" value="self"> Booking for myself</label>
+                        <label class="radio-inline"><input type="radio" id="who-others" name="forwho" value="others" checked="checked"> Booking for others</label>
+                    </div>
+                    -->
+                    <div class="form-group">
+                        <label for="contact-name">Ordering Person</label>
+                        <input id="contact-name" name="contact-name" placeholder="Ordering person full name" class="form-control" required="" type="text">
+                        <p class="help-block">Title included, eg. Mr Lee</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-phone">Ordering Phone</label>
+                        <input id="contact-phone" name="contact-phone" placeholder="Ordering phone" class="form-control" required="" type="text">
+                        <p class="help-block">Country code included, eg. +01(853)555-5555</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-email">Ordering E-mail</label>
+                        <input id="contact-email" name="contact-email" placeholder="Ordering E-mail" class="form-control" required="" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="passenger-num">Number of Passengers</label>
+                        <input id="passenger-num" name="passenger-num" placeholder="Adults, kids, aged" class="form-control" required="" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="passenger-names">Passenger Name(s)</label>
+                        <input id="passenger-names" name="passenger-names" placeholder="Passenger names and meeting sign" class="form-control" required="" type="text">
+                        <p class="help-block">Multiple names separated by commas, or just fill out the main passenger name</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="passenger-phone">Passenger Phone</label>
+                        <input id="passenger-phone" name="passenger-phone" placeholder="Cell phone number of passenger" class="form-control" required="" type="text">
+                        <p class="help-block">Fill only major passenger's phone number</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="when">When</label>
+                        <input id="when" name="when" placeholder="Date and time" class="form-control" required="" type="text">
+                        <p class="help-block">Enter the time of pickup in Beijing time(UTC+8), format is year-month-day hour:minute, eg: <i>2015-01-27 20:45</i> for <i>8:45pm 27th Jan 2015</i>.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input id="city" name="city" placeholder="City" class="form-control" required="" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="pickup-address">Pick Up</label>
+                        <input id="pickup-address" name="pickup-address" placeholder="Pick up address" class="form-control" required="" type="text">
+                        <p class="help-block">The more detailed the better.</p>
+                    </div>
+                    <p id="add-via"><a href="javascript:addVia();" class="">Add Via...</a></p>
+                    <div class="form-group hidden" id="via-group">
+                        <input id="via-address" name="via-address[]" placeholder="Via address" class="form-control" required="" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="dropoff-address">Drop Off</label>
+                        <input id="dropoff-address" name="dropoff-address" placeholder="Drop off address" class="form-control" required="" type="text">
+                        <p class="help-block">The more detailed the better.</p>
+                    </div>
+                    <label>Desired Vehicle Type</label>
+                    <div class="form-group">
+                        <select name="vehicle" class="form-control">
+                            <option value="">Please select a vehicle type</option>
+                            <?foreach ($this->vehicleTypes as $t) {?>
+                            <option value="<?=htmlspecialchars($t['name'])?>"><?=htmlspecialchars($t['name'])?></option>
+                            <?}?>
+                        </select>
+                        <p class="help-block">Choose a desired vehicle type</p>
+                    </div>
+                    <label>Payment Method</label>
+                    <div class="form-group">
+                        <label class="radio-inline"><input type="radio" id="payment-paypal" name="payment-method" value="paypal"> PayPal</label>
+                        <label class="radio-inline"><input type="radio" id="payment-cash" name="payment-method" value="cash"> Cash</label>
+                        <label class="radio-inline"><input type="radio" id="payment-account" name="payment-method" value="account"> Account</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" name="notes" placeholder="Notes" class="form-control" required=""></textarea>
+                        <p class="help-block">Additional information, such as child seats, luggage, flight number, or to specify a more specific or iconic pickup locations</p>
+                    </div>
+                    <div class="form-group"><button id="booking-button" type="button" class="btn btn-primary btn-lg">OK</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</div>
+<!-- /#page-wrapper -->
+<script>
+$('#when').datetimepicker({
+    format: 'Y-m-d H:i',
+    step: 10,
+    minDate: 0,
+});
+
+function addVia() {
+    var element = $('#via-group').clone();
+    $('#add-via').before(element);
+    element.removeClass('hidden');
+    element.attr('id', '');
+}
+
+function submitBookingForm() {
+    var options = {
+        url: '/private-car/booking',
+        dataType: 'json',
+        beforeSubmit: disableBookingButton,
+        success: bookingDidComplate,
+        error: bookingDidComplateWithError
+    };
+    $('#booking-form').ajaxSubmit(options);
+}
+
+function bookingDidComplate(data, status, xhr, element) {
+    if (data['status'] == 0) {
+        alert('Error while processing request, please try again.');
+        enableBookingButton();
+        return;
+    }
+    var sn = data['message'];
+    window.location.href='/private-car/order-detail?sn=' + sn;
+}
+
+function bookingDidComplateWithError(e) {
+    alert('Error while processing request, please try again. ' + e);
+    enableBookingButton();
+}
+
+function disableBookingButton() {
+    $('booking-button').attr('disabled', 'disabled');
+}
+function enableBookingButton() {
+    $('booking-button').removeAttr('disabled');
+}
+$('#booking-button').on('click', submitBookingForm);
+</script>
+<?$this->renderScript('common/user-foot.phtml')?>

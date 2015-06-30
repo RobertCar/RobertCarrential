@@ -1,0 +1,404 @@
+<?$this->renderScript('common/admin-head.phtml')?>
+<!-- Page Content -->
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Order SN: <?=htmlspecialchars($this->order->get('sn'))?></h1>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <dl class="dl-horizontal">
+                    <dt>SN</dt>
+                    <dd><?=htmlspecialchars($this->order->get('sn'))?></dd>
+                    <dt>Status</dt>
+                    <dd><?=Model_Order::getStatusDesc($this->order->get('status'))?></dd>
+
+                    <dt></dt><dd>&nbsp;</dd>
+
+                    <dt>City</dt>
+                    <dd><?=htmlspecialchars($this->order->get('city'))?></dd>
+                    <dt>Passengers</dt>
+                    <dd><?=htmlspecialchars($this->order->get('passenger_names'))?></dd>
+                    <dt>Passenger Phone</dt>
+                    <dd><?=htmlspecialchars($this->order->get('passenger_phone'))?></dd>
+                    <dt>Number of Passengers</dt>
+                    <dd><?=htmlspecialchars($this->order->get('passenger_num'))?></dd>
+                    <dt>Desired Vehicle Type</dt>
+                    <dd><?=htmlspecialchars($this->order->get('vehicle'))?></dd>
+
+                    <dt></dt><dd>&nbsp;</dd>
+
+                    <!--
+                    <dt>Who</dt>
+                    <dd><?=htmlspecialchars($this->order->get('forwho'))?></dd>
+                    -->
+                    <dt>Ordering Contact</dt>
+                    <dd><?=htmlspecialchars($this->order->get('contact_name'))?></dd>
+                    <dt>Ordering Phone</dt>
+                    <dd><?=htmlspecialchars($this->order->get('contact_phone'))?></dd>
+                    <dt>Ordering E-Mail</dt>
+                    <dd><?=htmlspecialchars($this->order->get('contact_email'))?></dd>
+
+                    <dt></dt><dd>&nbsp;</dd>
+
+                    <dt>When</dt>
+                    <dd><?=htmlspecialchars($this->order->get('when'))?></dd>
+                    <dt>Pick Up</dt>
+                    <dd><?=htmlspecialchars($this->order->get('pickup_address'))?></dd>
+                    <?
+                    $vias = $this->order->get('via');
+                    $vias = json_decode($vias);
+                    foreach ($vias as $n=>$via) {
+                    ?>
+                    <dt>Via #<?=$n+1?></dt>
+                    <dd><?=htmlspecialchars($via)?></dd>
+                    <?
+                    } // foreach $vias as $via
+                    ?>
+                    <dt>Drop Off</dt>
+                    <dd><?=htmlspecialchars($this->order->get('dropoff_address'))?></dd>
+                    <!--
+                    <dt>Vehicle</dt>
+                    <dd><?=htmlspecialchars($this->order->get('vehicle'))?></dd>
+                    -->
+
+                    <dt></dt><dd>&nbsp;</dd>
+
+                    <dt>Driver</dt>
+                    <dd>
+                        <?if ($this->driverAssigned) {?>
+                            <?=htmlspecialchars($this->driverAssigned->get('name'))?> <?=htmlspecialchars($this->driverAssigned->get('phone'))?>
+                        <?} else {?>
+                            Unassigned.
+                        <?}?>
+                    </dd>
+                    <dt>Vehicle</dt>
+                    <dd>
+                        <?if ($this->vehicleAssigned) {?>
+                        <?=htmlspecialchars($this->vehicleAssigned->get('lpn'))?> - <?=htmlspecialchars($this->vehicleAssigned->get('color'))?> <?=htmlspecialchars($this->vehicleAssigned->get('model'))?>, <?=htmlspecialchars($this->vehicleAssigned->get('seats'))?> seats
+                        <?} else {?>
+                            Unassigned.
+                        <?}?>
+                    </dd>
+
+                    <dt></dt><dd>&nbsp;</dd>
+                    
+                    <dt>Payment Method</dt>
+                    <dd><?=htmlspecialchars(ucfirst($this->order->get('payment_method')))?></dd>
+                    <dt>Notes</dt>
+                    <dd><?=nl2br(htmlspecialchars($this->order->get('notes')))?></dd>
+
+                    <dt></dt><dd>&nbsp;</dd>
+
+                    <dt>Driver Location</dt>
+                    <dd>
+                        <?if ($this->driver->get('coordinates')) {?>
+                        <a href="http://restapi.amap.com/v3/staticmap?location=<?=htmlspecialchars($this->driver->get('coordinates'))?>&amp;zoom=13&amp;size=900*700&amp;markers=mid,,A:<?=htmlspecialchars($this->driver->get('coordinates'))?>&amp;key=ee95e52bf08006f63fd29bcfbcf21df0" target="_blank">View Map (Last report at <?=date('Y-m-d H:i:s', $this->driver->get('locate_time'))?>)</a>
+                        <?} else {?>
+                            Unavailable
+                        <?}?>
+                    </dd>
+                    <dt>Passenger Location</dt>
+                    <dd>
+                        <?if ($this->order->get('passenger_coordinates')) {?>
+                        <a href="http://restapi.amap.com/v3/staticmap?location=<?=htmlspecialchars($this->order->get('passenger_coordinates'))?>&amp;zoom=13&amp;size=900*700&amp;markers=mid,,A:<?=htmlspecialchars($this->order->get('passenger_coordinates'))?>&amp;key=ee95e52bf08006f63fd29bcfbcf21df0" target="_blank">View Map (Last report at <?=date('Y-m-d H:i:s', $this->order->get('passenger_locate_time'))?>)</a>
+                        <?} else {?>
+                            Unavailable
+                        <?}?>
+                    </dd>
+                </dl>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#edit-modal">Edit this order</button>
+                <button class="btn btn-success" data-toggle="modal" data-target="#edit-for-driver">Edit info for driver</button>
+                <a href="order-conversation?sn=<?=$this->order->get('sn')?>" class="btn btn-info" target="_blank">Conversation</a>
+            </div>
+        </div>
+
+        <!-- Edit order modal -->
+        <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form role="form" method="post" action="" id="booking-form">
+                        <input type="hidden" name="sn" value="<?=htmlspecialchars($this->order->get('sn'))?>" />
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="editModalLabel">Edit Order (SN: <?=htmlspecialchars($this->order->get('sn'))?>)</h4>
+                        </div>
+                        <div class="modal-body">
+                           <div class="form-group">
+                                <label for="contact-name">Ordering Contact</label>
+                                <input id="contact-name" name="contact-name" placeholder="Name of Contact" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->order->get('contact_name'))?>">
+                                <p class="help-block">Title included, eg. Mr Lee</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-email">Ordering Email</label>
+                                <input id="contact-email" name="contact-email" placeholder="E-mail of Contact" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->order->get('contact_email'))?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-phone">Ordering Phone</label>
+                                <input id="contact-phone" name="contact-phone" placeholder="Cell phone number of Contact" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->order->get('contact_phone'))?>">
+                                <p class="help-block">Country code included, eg. +01(853)555-5555</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="passenger-num">Number of Passengers</label>
+                                <input id="passenger-num" name="passenger-num" placeholder="Number of passengers" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->order->get('passenger_num'))?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="passenger-names">Passenger Name(s)</label>
+                                <input id="passenger-names" name="passenger-names" placeholder="Passenger names" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->order->get('passenger_names'))?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="passenger-phone">Passenger Phone</label>
+                                <input id="passenger-phone" name="passenger-phone" placeholder="Passenger Phone" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->order->get('passenger_phone'))?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="when">When</label>
+                                <input id="when" name="when" placeholder="Date and time" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->order->get('when'))?>">
+                                <p class="help-block">Enter the time of pickup in Beijing time(UTC+8), format is year-month-day hour:minute, eg: <i>2015-01-27 20:45</i> for <i>8:45pm 27th Jan 2015</i>.</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="city">City</label>
+                                <input id="city" name="city" placeholder="City" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->order->get('city'))?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="pickup-address">Pick Up Address</label>
+                                <input id="pickup-address" name="pickup-address" placeholder="Pick up address" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->order->get('pickup_address'))?>">
+                                <p class="help-block">The more detailed the better.</p>
+                            </div>
+                            <p id="add-via"><a href="javascript:addVia();" class="">Add Via...</a></p>
+                            <p class="help-block">(If you want to remove a stop, just simply leave that empty.)</p>
+                            <div class="form-group hidden" id="via-group">
+                                <input id="via-address" name="via-address[]" placeholder="Via Address" class="form-control" required="" type="text">
+                            </div>
+                            <?
+                            $vias = $this->order->get('via');
+                            $vias = json_decode($vias);
+                            foreach ($vias as $n=>$via) {
+                                $n++;
+                            ?>
+                            <div class="form-group" id="via-group">
+                                <input id="via-address-<?=$n?>" name="via-address[]" placeholder="Via Address" class="form-control" required="" type="text" value="<?=htmlspecialchars($via)?>">
+                            </div>
+                            <?
+                            } // foreach $vias as $via
+                            ?>
+                            <div class="form-group">
+                                <label for="dropoff-address">Drop Off Address</label>
+                                <input id="dropoff-address" name="dropoff-address" placeholder="Drop off address" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->order->get('dropoff_address'))?>">
+                                <p class="help-block">The more detailed the better.</p>
+                            </div>
+                            <label>Desired Vehicle Type</label>
+                            <div class="form-group">
+                                <select name="vehicle" class="form-control">
+                                    <option value="">Please select a vehicle type</option>
+                                    <?foreach ($this->vehicleTypes as $t) {?>
+                                    <option value="<?=htmlspecialchars($t['name'])?>" <?if ($t['name']==$this->order->get('vehicle')) {echo 'selected="selected"';}?>><?=htmlspecialchars($t['name'])?></option>
+                                    <?}?>
+                                </select>
+                            </div>
+                            <label>Payment Method</label>
+                            <div class="form-group">
+                                <label class="radio-inline"><input <?if ($this->order->get('payment_method')=='paypal') {echo 'checked="checked"';}?> type="radio" id="payment-paypal" name="payment-method" value="paypal"> PayPal</label>
+                                <label class="radio-inline"><input <?if ($this->order->get('payment_method')=='cash') {echo 'checked="checked"';}?> type="radio" id="payment-cash" name="payment-method" value="cash"> Cash</label>
+                                <label class="radio-inline"><input <?if ($this->order->get('payment_method')=='account') {echo 'checked="checked"';}?> type="radio" id="payment-account" name="payment-method" value="account"> Account</label>
+                            </div>
+                            <div class="form-group">
+                                <label for="notes">Notes</label>
+                                <textarea id="notes" name="notes" placeholder="Notes" class="form-control"><?=htmlspecialchars($this->order->get('notes'))?></textarea>
+                                <p class="help-block">Additional information, such as child seats, or to specify a more specific or iconic pickup locations</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="booking-button">Save Change</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
+        <!-- Edit order for driver modal -->
+        <div class="modal fade" id="edit-for-driver" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form role="form" method="post" action="edit-order-for-driver" id="driver-order-form">
+                        <input type="hidden" name="sn" value="<?=htmlspecialchars($this->order->get('sn'))?>" />
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="editModalLabel">编辑司机侧订单信息 (SN: <?=htmlspecialchars($this->order->get('sn'))?>)</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="driver-code">指派给司机</label>
+                                <select id="driver-code" name="driver-code" class="input-lg">
+                                    <option value="">不指派</option>
+                                    <?foreach ($this->drivers as $v) {?>
+                                    <option <?if($this->orderForDriver->get('driver_code')==$v['code']){echo 'selected="selected"';}?> value="<?=$v['code']?>"><?=$v['name']?> (<?=$v['phone']?>)</option>
+                                    <?}?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="vehicle-id">选择车辆</label>
+                                <select id="vehicle-id" name="vehicle-id" class="input-lg">
+                                    <option value="">不指派</option>
+                                    <?foreach ($this->vehicles as $v) {?>
+                                    <option <?if($this->orderForDriver->get('vehicle_id')==$v['id']){echo 'selected="selected"';}?> value="<?=$v['id']?>"><?=$v['lpn']?> - <?=$v['color']?> <?=$v['model']?>, <?=$v['seats']?> seats</option>
+                                    <?}?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-name">联系人名称</label>
+                                <input id="contact-name" name="contact-name" placeholder="联系人名称" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->orderForDriver->get('contact_name'))?>">
+                                <p class="help-block">订车人名字：<?=htmlspecialchars($this->order->get('contact_name'))?><br>乘客名字：<?=htmlspecialchars($this->order->get('passenger_names'))?></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-phone">联系人电话</label>
+                                <input id="contact-phone" name="contact-phone" placeholder="联系人电话" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->orderForDriver->get('contact_phone'))?>">
+                                <p class="help-block">订车人电话：<?=htmlspecialchars($this->order->get('contact_phone'))?><br>乘客电话：<?=htmlspecialchars($this->order->get('passenger_phone'))?></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="when">接客时间</label>
+                                <input id="when" name="when" placeholder="接客时间" class="form-control" required="" type="text" value="<?if (!empty($this->orderForDriver->get('when'))) {echo date('Y-m-d H:i', $this->orderForDriver->get('when'));} else {echo htmlspecialchars($this->order->get('when'));}?>">
+                                <p class="help-block"><?=htmlspecialchars($this->order->get('when'))?></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="pickup-address">接客地点</label>
+                                <input id="pickup-address" name="pickup-address" placeholder="接客地点" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->orderForDriver->get('pickup_address'))?>">
+                                <p class="help-block"><?=htmlspecialchars($this->order->get('pickup_address'))?></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="pickup-coordinates">接客地点坐标</label>
+                                <input id="pickup-coordinates" name="pickup-coordinates" placeholder="接客地点坐标，逗号分隔，经度在前" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->orderForDriver->get('pickup_coordinates'))?>">
+                                <p class="help-block"><a href="http://restapi.amap.com/v3/staticmap?location=<?=htmlspecialchars($this->orderForDriver->get('pickup_coordinates'))?>&amp;zoom=13&amp;size=900*700&amp;markers=mid,,A:<?=htmlspecialchars($this->orderForDriver->get('pickup_coordinates'))?>&amp;key=ee95e52bf08006f63fd29bcfbcf21df0" target="_blank">查看地图</a> <a href="http://lbs.amap.com/console/show/picker" target="_blank">地图坐标拾取工具</a></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="via">经停地点</label>
+                                <?php
+                                $via = json_decode($this->orderForDriver->get('via'));
+                                $viaText = '';
+                                if (is_array($via)) {
+                                    foreach ($via as $v) {
+                                        $viaText .= htmlspecialchars($v) . "\n";
+                                    }
+                                }
+                                $viaText = trim($viaText);
+                                ?>
+                                <textarea id="via" name="via" placeholder="经停地点，每行一个" class="form-control"><?=$viaText?></textarea>
+                            </div>
+                            <ul class="help-block">
+                            <?
+                            $vias = $this->order->get('via');
+                            $vias = json_decode($vias);
+                            foreach ($vias as $n=>$via) {
+                                $n++;
+                            ?>
+                                <li><?=htmlspecialchars($via)?></li>
+                            <?
+                            } // foreach $vias as $via
+                            ?>
+                            </ul>
+                            <div class="form-group">
+                                <label for="via-coordinates">经停地点坐标</label>
+                                <?php
+                                $viaCoordinates = json_decode($this->orderForDriver->get('via_coordinates'));
+                                $viaCoordinatesText = '';
+                                if (is_array($viaCoordinates)) {
+                                    foreach ($viaCoordinates as $v) {
+                                        $viaCoordinatesText .= htmlspecialchars($v) . "\n";
+                                    }
+                                }
+                                $viaCoordinatesText = trim($viaCoordinatesText);
+                                ?>
+                                <textarea id="via-coordinates" name="via-coordinates" placeholder="经停地点坐标，每行一个，注意跟经停地点要对应" class="form-control"><?=$viaCoordinatesText?></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="dropoff-address">送达地点</label>
+                                <input id="dropoff-address" name="dropoff-address" placeholder="送达地点" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->orderForDriver->get('dropoff_address'))?>">
+                                <p class="help-block"><?=htmlspecialchars($this->order->get('dropoff_address'))?></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="dropoff-coordinates">送达地点坐标</label>
+                                <input id="dropoff-coordinates" name="dropoff-coordinates" placeholder="送达地点坐标，逗号分隔，经度在前" class="form-control" required="" type="text" value="<?=htmlspecialchars($this->orderForDriver->get('dropoff_coordinates'))?>">
+                                <p class="help-block"><a href="http://restapi.amap.com/v3/staticmap?location=<?=htmlspecialchars($this->orderForDriver->get('dropoff_coordinates'))?>&amp;zoom=13&amp;size=900*700&amp;markers=mid,,A:<?=htmlspecialchars($this->orderForDriver->get('dropoff_coordinates'))?>&amp;key=ee95e52bf08006f63fd29bcfbcf21df0" target="_blank">查看地图</a> <a href="http://lbs.amap.com/console/show/picker" target="_blank">地图坐标拾取工具</a></p>
+                            </div>
+                            <label>付款方式</label>
+                            <div class="form-group">
+                                <label class="radio-inline"><input <?if ($this->order->get('payment_method')=='paypal') {echo 'checked="checked"';}?> type="radio" id="payment-paypal" name="payment-method" value="贝宝"> 贝宝</label>
+                                <label class="radio-inline"><input <?if ($this->order->get('payment_method')=='cash') {echo 'checked="checked"';}?> type="radio" id="payment-cash" name="payment-method" value="现金"> 现金</label>
+                                <label class="radio-inline"><input <?if ($this->order->get('payment_method')=='account') {echo 'checked="checked"';}?> type="radio" id="payment-account" name="payment-method" value="公司付款"> 公司付款</label>
+                            </div>
+                            <div class="form-group">
+                                <label for="notes">备注</label>
+                                <textarea id="notes" name="notes" placeholder="备注信息" class="form-control"><?=htmlspecialchars($this->orderForDriver->get('notes'))?></textarea>
+                                <p class="help-block"><?=nl2br(htmlspecialchars($this->order->get('notes')))?></p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="submit" class="btn btn-primary" id="edit-order-for-driver-button">保存司机侧订单信息</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+    </div>
+    <!-- /.container-fluid -->
+</div>
+<!-- /#page-wrapper -->
+<script>
+$('[name=when]').datetimepicker({
+    format: 'Y-m-d H:i',
+    step: 10,
+    minDate: 0,
+});
+
+function addVia() {
+    var element = $('#via-group').clone();
+    $('#add-via').before(element);
+    element.removeClass('hidden');
+    element.attr('id', '');
+}
+
+function submitBookingForm() {
+    var options = {
+        url: '/private-car-management/order-detail',
+        dataType: 'json',
+        beforeSubmit: disableBookingButton,
+        success: bookingDidComplate,
+        error: bookingDidComplateWithError
+    };
+    $('#booking-form').ajaxSubmit(options);
+}
+
+function bookingDidComplate(data, status, xhr, element) {
+    if (data['status'] == 0) {
+        alert('Error while processing request, please try again.');
+        enableBookingButton();
+        return;
+    }
+    var sn = data['message'];
+    window.location.reload();
+}
+
+function bookingDidComplateWithError(e) {
+    alert('Error while processing request, please try again. ' + e);
+    enableBookingButton();
+}
+
+function disableBookingButton() {
+    $('booking-button').attr('disabled', 'disabled');
+}
+function enableBookingButton() {
+    $('booking-button').removeAttr('disabled');
+}
+$('#booking-button').on('click', submitBookingForm);
+</script>
+<?$this->renderScript('common/user-foot.phtml')?>

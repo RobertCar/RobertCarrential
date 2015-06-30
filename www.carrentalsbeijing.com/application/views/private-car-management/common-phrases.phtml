@@ -1,0 +1,60 @@
+<?$this->renderScript('common/admin-head.phtml')?>
+<!-- Page Content -->
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <h1>Add Common Phrase</h1>
+        <div class="row">
+            <div class="col-lg-12">
+                <form role="form" method="post" action="add-common-phrase">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="zh" placeholder="Chinese">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="en" placeholder="English">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Phrase</button>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Common Phrases</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Chinese</th>
+                                <th>English</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?foreach ($this->phrases as $v) {?>
+                            <tr id="phrase-<?=$v['id']?>">
+                                <td name="zh"><?=htmlspecialchars($v['zh'])?></td>
+                                <td name="en"><?=htmlspecialchars($v['en'])?></td>
+                                <td><a href="javascript:deletePhrase('<?=$v['id']?>');">Delete</a></td>
+                            </tr>
+                            <?}?>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</div>
+<!-- /#page-wrapper -->
+<script>
+function deletePhrase(id) {
+    if (confirm('Do you want to delete this phrase?')) {
+        window.location.href="delete-common-phrase?id=" + id;
+    }
+}
+</script>
+<?$this->renderScript('common/user-foot.phtml')?>
